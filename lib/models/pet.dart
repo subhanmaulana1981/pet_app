@@ -19,6 +19,7 @@ class Pet {
   });
 
   /* metode */
+  // copyWith
   Pet copyWith({
     String? id,
     String? name,
@@ -33,5 +34,26 @@ class Pet {
       isFavorite: isFavorite ?? this.isFavorite,
       image: image ?? this.image
     );
+  }
+
+  // factory constructor to deserialize api response
+  factory Pet.fromJson(Map<String, dynamic> json) {
+    return Pet(
+      id: json['id'] ?? json['id'] ?? '',
+      name: json['name'] as String? ?? '',
+      species: json['species'] as String? ?? '',
+      isFavorite: json['isFavorite'] as bool? ?? false,
+      image: json['image'] as String?
+    );
+  }
+
+  // serialize to json for post / put payloads
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'species': species,
+      'isFavorite': isFavorite,
+      if (image != null) 'image': image
+    };
   }
 }

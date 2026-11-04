@@ -1,19 +1,27 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:pet_app/models/pet.dart';
+import 'package:pet_app/services/pet_api_service.dart';
 
 /* kelas provider */
 class PetProvider extends ChangeNotifier {
-  /* properti */
+  /* properti(es) */
+  // online service
+  final PetApiService _apiService;
+  bool _isLoading = false;
+  String? _errorMesage;
+
+  // konstruksi
+  // dependency injection
+  PetProvider({
+    PetApiService? apiService
+  }) : _apiService = apiService ?? PetApiService();
+
   // private internal state
-  final List<Pet> _pets = [
-    const Pet(id: "1", name: "luna", species: "cat", isFavorite: false),
-    const Pet(id: "2", name: "milo", species: "dog", isFavorite: true),
-    const Pet(id: "3", name: "pip", species: "bird", isFavorite: false),
-  ];
+  List<Pet> _pets = [];
 
   /* metode */
-  // public getter to expose an unmodifiable list
+  // public getters to expose an unmodifiable list
   List<Pet> get pets {
     return List.unmodifiable(_pets);
   }
@@ -23,6 +31,34 @@ class PetProvider extends ChangeNotifier {
       return p.isFavorite;
     }).length;
   }
+  // loading
+  bool get isLoading {
+    return _isLoading;
+  }
+  // error message
+  String? get errorMessage {
+    return _errorMesage;
+  }
+
+  /* business logics */
+  // 1. fetch all pets from api
+  Future<void> loadPets() async {
+    _isLoading = true;
+    _errorMesage = null;
+    notifyListeners();
+
+    try {
+      _pets = await _apiService.getPets();
+
+    } catch(e) {
+      _errorMesage = e.toString();
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // business logic favorite
   void toggleFavorite(String petId) {
     final index = _pets.indexWhere((test) {
