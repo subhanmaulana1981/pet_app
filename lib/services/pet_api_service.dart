@@ -15,6 +15,26 @@ class PetApiService {
     'ngrok-skip-browser-warning': 'true',
   };
 
+  // POST /api/pets
+  Future<Pet> createPet(Pet pet) async {
+    final uri = Uri.parse('$baseUrl/api/pets');
+    final response = await http.post(
+      uri,
+      headers: _headers,
+      body: jsonEncode(pet.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> jsonBody = jsonDecode(response.body);
+      final dynamic data = jsonBody['data'];
+
+      return Pet.fromJson(data as Map<String, dynamic>);
+
+    } else {
+      throw Exception('failed to add pet (status: ${response.statusCode})');
+    }
+  }
+
   // GET /api/pets
   Future<List<Pet>> getPets() async {
     final uri = Uri.parse('$baseUrl/api/pets');
@@ -34,5 +54,4 @@ class PetApiService {
       );
     }
   }
-
 }

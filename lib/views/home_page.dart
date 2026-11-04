@@ -102,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   subtitle: Text(pet.species),
                   trailing: IconButton(
                     onPressed: () {
-                      context.read<PetProvider>().toggleFavorite(pet.id);
+                      // context.read<PetProvider>().toggleFavorite(pet.id);
                     },
                     icon: Icon(
                       pet.isFavorite ? Icons.favorite : Icons.favorite_border,

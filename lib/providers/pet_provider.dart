@@ -41,6 +41,29 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 2. adding the pet via api
+  Future<void> addPet(Pet newPet) async {
+    _isLoading = true;
+    _errorMesage = null;
+    notifyListeners();
+
+    try {
+      final savedPet = await _apiService.createPet(newPet);
+      // add to the top of the list
+      _pets.insert(0, savedPet);
+
+    } catch (e) {
+      _errorMesage = e.toString();
+      // rethrow so the ui can catch
+      // and show an error snackBar
+      rethrow;
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // 1. fetch all pets from api
   Future<void> loadPets() async {
     _isLoading = true;
@@ -60,7 +83,7 @@ class PetProvider extends ChangeNotifier {
   }
 
   // business logic favorite
-  void toggleFavorite(String petId) {
+  /*void toggleFavorite(String petId) {
     final index = _pets.indexWhere((test) {
       return test.id == petId;
     });
@@ -71,10 +94,10 @@ class PetProvider extends ChangeNotifier {
     }
     // key method: informs all active listeners to rebuild!
     notifyListeners();
-  }
+  }*/
   // business logic adding the pet
-  void addPet(Pet newPet) {
+  /*void addPet(Pet newPet) {
     _pets.add(newPet);
     notifyListeners();
-  }
+  }*/
 }

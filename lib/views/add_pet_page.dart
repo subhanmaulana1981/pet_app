@@ -12,6 +12,7 @@ class AddPetPage extends StatefulWidget {
 }
 
 class _AddPetPageState extends State<AddPetPage> {
+  bool _isSubmitting = false;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
@@ -35,33 +36,60 @@ class _AddPetPageState extends State<AddPetPage> {
     super.dispose();
   }
 
-  void _savePet() {
+  Future<void> _savePet() async {
     // 1. validate form fields
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // 2. create new pet object with unique timestamp id
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    // 2. create new pet object
+    // without manual id
+    // database will generate id
     final newPet = Pet(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '',
       name: _nameController.text.trim(),
       species: _selectedSpecies!,
       isFavorite: _isFavorite,
     );
 
-    // 3. dispatch to petProvider using context.read()
-    context.read<PetProvider>().addPet(newPet);
+    try {
+      // 3. dispatch to petProvider using context.read()
+      await context.read<PetProvider>().addPet(newPet);
 
-    // 4. show confirmation feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${newPet.name} has been added!'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      if (!mounted) return;
 
-    // 5. navigate back to homePage
-    Navigator.of(context).pop();
+      // 4. show confirmation feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${newPet.name} has been added!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // 5. navigate back to homePage
+      Navigator.of(context).pop();
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('failed to add pet: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
+      );
+
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -147,9 +175,18 @@ class _AddPetPageState extends State<AddPetPage> {
 
               // save button
               FilledButton.icon(
-                onPressed: _savePet,
-                icon: Icon(Icons.check),
-                label: Text('add pet'),
+                onPressed: _isSubmitting ? null : _savePet,
+                icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(Icons.check),
+                label: Text(_isSubmitting ? 'saving..' : 'add pet'),
                 style: FilledButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14.0),
                 ),
