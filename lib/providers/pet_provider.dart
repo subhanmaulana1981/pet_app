@@ -10,15 +10,14 @@ class PetProvider extends ChangeNotifier {
   final PetApiService _apiService;
   bool _isLoading = false;
   String? _errorMesage;
+  // private internal state
+  List<Pet> _pets = [];
 
-  // konstruksi
+  /* konstruksi */
   // dependency injection
   PetProvider({
     PetApiService? apiService
   }) : _apiService = apiService ?? PetApiService();
-
-  // private internal state
-  List<Pet> _pets = [];
 
   /* metode */
   // public getters to expose an unmodifiable list
@@ -31,16 +30,47 @@ class PetProvider extends ChangeNotifier {
       return p.isFavorite;
     }).length;
   }
-  // loading
+  // getting loading
   bool get isLoading {
     return _isLoading;
   }
-  // error message
+  // getting error message
   String? get errorMessage {
     return _errorMesage;
   }
 
   /* business logics */
+  // 3. toggle favorite with optimistic update and rollback
+  Future<void> toggleFavorite(String petId) async {
+    final index = _pets.indexWhere((test) {
+      return test.id == petId;
+    });
+    if (index == -1) return;
+
+    // 1. optimistic update: flip immediately in ui
+    final originalPet = _pets[index];
+    _pets[index] = originalPet.copyWith(
+      isFavorite: !originalPet.isFavorite
+    );
+    // key method: informs all active listeners to rebuild!
+    notifyListeners();
+
+    try {
+      // 2. call the backend
+      final updatedPet = await _apiService.toggleFavorite(petId);
+      // sync with response data from server
+      _pets[index] = updatedPet;
+      notifyListeners();
+
+    } catch (e) {
+      // 3. rollback if the network request fails
+      _pets[index] = originalPet;
+      _errorMesage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   // 2. adding the pet via api
   Future<void> addPet(Pet newPet) async {
     _isLoading = true;
@@ -81,23 +111,4 @@ class PetProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // business logic favorite
-  /*void toggleFavorite(String petId) {
-    final index = _pets.indexWhere((test) {
-      return test.id == petId;
-    });
-    if (index != -1) {
-      _pets[index] = _pets[index].copyWith(
-        isFavorite: !_pets[index].isFavorite
-      );
-    }
-    // key method: informs all active listeners to rebuild!
-    notifyListeners();
-  }*/
-  // business logic adding the pet
-  /*void addPet(Pet newPet) {
-    _pets.add(newPet);
-    notifyListeners();
-  }*/
 }

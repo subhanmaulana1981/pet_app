@@ -101,11 +101,27 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: Text(pet.name),
                   subtitle: Text(pet.species),
                   trailing: IconButton(
-                    onPressed: () {
-                      // context.read<PetProvider>().toggleFavorite(pet.id);
+                    onPressed: () async {
+                      try {
+                        await context
+                            .read<PetProvider>()
+                            .toggleFavorite(pet.id);
+
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('failed to update favorite: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
                     },
                     icon: Icon(
-                      pet.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      pet.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       color: pet.isFavorite ? Colors.red : null,
                     ),
                   ),

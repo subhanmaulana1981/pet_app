@@ -15,7 +15,26 @@ class PetApiService {
     'ngrok-skip-browser-warning': 'true',
   };
 
-  // POST /api/pets
+  // 3. PATCH /api/pets/:id/favorite
+  Future<Pet> toggleFavorite(String id) async {
+    final uri = Uri.parse('$baseUrl/api/pets/$id/favorite');
+    final response = await http.patch(
+      uri,
+      headers: _headers
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonBody = jsonDecode(response.body);
+      final dynamic data = jsonBody['data'];
+
+      return Pet.fromJson(data as Map<String, dynamic>);
+
+    } else {
+      throw Exception('failed to update favorite (status: ${response.statusCode})');
+    }
+  }
+
+  // 2. POST /api/pets
   Future<Pet> createPet(Pet pet) async {
     final uri = Uri.parse('$baseUrl/api/pets');
     final response = await http.post(
@@ -35,7 +54,7 @@ class PetApiService {
     }
   }
 
-  // GET /api/pets
+  // 1. GET /api/pets
   Future<List<Pet>> getPets() async {
     final uri = Uri.parse('$baseUrl/api/pets');
     final response = await http.get(uri, headers: _headers);
