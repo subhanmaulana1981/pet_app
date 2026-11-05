@@ -55,8 +55,16 @@ class PetApiService {
   }
 
   // 1. GET /api/pets
-  Future<List<Pet>> getPets() async {
-    final uri = Uri.parse('$baseUrl/api/pets');
+  Future<List<Pet>> getPets({String? species}) async {
+    // base uri
+    var uri = Uri.parse('$baseUrl/api/pets');
+    // if species is specified and not 'all',
+    // attach query parameters
+    if (species != null && species.isNotEmpty && species.toLowerCase() != 'all') {
+      uri = uri.replace(queryParameters: {
+        'species': species.toLowerCase()
+      });
+    }
     final response = await http.get(uri, headers: _headers);
 
     if (response.statusCode == 200) {

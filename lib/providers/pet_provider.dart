@@ -12,6 +12,8 @@ class PetProvider extends ChangeNotifier {
   String? _errorMesage;
   // private internal state
   List<Pet> _pets = [];
+  // track currently active species filter
+  String _selectedSpecies = 'all';
 
   /* konstruksi */
   // dependency injection
@@ -20,6 +22,10 @@ class PetProvider extends ChangeNotifier {
   }) : _apiService = apiService ?? PetApiService();
 
   /* metode */
+  // getter for ui chips to know which one is selected
+  String get selectedSpecies {
+    return _selectedSpecies;
+  }
   // public getters to expose an unmodifiable list
   List<Pet> get pets {
     return List.unmodifiable(_pets);
@@ -40,6 +46,16 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 4. called when user taps a filter chip
+  Future<void> filterBySpecies(String species) async {
+    // avoid duplicate fetch
+    if (_selectedSpecies == species) {
+      return;
+    }
+    _selectedSpecies = species;
+    await loadPets();
+  }
+
   // 3. toggle favorite with optimistic update and rollback
   Future<void> toggleFavorite(String petId) async {
     final index = _pets.indexWhere((test) {
@@ -101,7 +117,9 @@ class PetProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _pets = await _apiService.getPets();
+      _pets = await _apiService.getPets(
+        species: _selectedSpecies
+      );
 
     } catch(e) {
       _errorMesage = e.toString();
