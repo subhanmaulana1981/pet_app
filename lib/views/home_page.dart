@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_app/providers/pet_provider.dart';
 import 'package:pet_app/views/add_pet_page.dart';
+import 'package:pet_app/widgets/pet_avatar.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -140,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           // 1. the search bar (top)
           _buildSearchBar(context),
-          
+
           // 2. the filter chips (pinned at top)
           _buildSpeciesFilter(context, petProvider),
 
@@ -190,9 +191,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index) {
                       final pet = pets[index];
                       return ListTile(
-                        leading: CircleAvatar(
-                            child: Text(pet.species.substring(0, 1).toUpperCase())
-                        ),
+                        // this is the new pet avatar
+                        leading: PetAvatar(pet: pet),
                         title: Text(pet.name),
                         subtitle: Text(pet.species),
                         trailing: IconButton(
