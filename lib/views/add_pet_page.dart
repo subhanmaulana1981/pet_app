@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:pet_app/models/pet.dart';
 import 'package:pet_app/providers/pet_provider.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 
 class AddPetPage extends StatefulWidget {
   const AddPetPage({super.key});
@@ -12,6 +15,12 @@ class AddPetPage extends StatefulWidget {
 }
 
 class _AddPetPageState extends State<AddPetPage> {
+  final ImagePicker _picker = ImagePicker();
+  // raw base64 string to send to the backend
+  String? _imageBase64;
+  // in-memory bytes for immediate local ui preview
+  Uint8List? _imageBytes;
+
   bool _isSubmitting = false;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -36,6 +45,44 @@ class _AddPetPageState extends State<AddPetPage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        //prevents huge base64 payloads
+        maxWidth: 600,
+        maxHeight: 600,
+        // 80% jpeg quality
+        // keeps size ~30-60 kb
+        imageQuality: 80,
+      );
+      // user canceled
+      if (pickedFile == null) return;
+
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+        _imageBase64 = base64Encode(bytes);
+      });
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('failed to pick image: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imageBytes = null;
+      _imageBase64 = null;
+    });
+  }
+
   Future<void> _savePet() async {
     // 1. validate form fields
     if (!_formKey.currentState!.validate()) {
@@ -54,6 +101,8 @@ class _AddPetPageState extends State<AddPetPage> {
       name: _nameController.text.trim(),
       species: _selectedSpecies!,
       isFavorite: _isFavorite,
+      // passed directly to the backend
+      image: _imageBase64
     );
 
     try {
@@ -106,6 +155,69 @@ class _AddPetPageState extends State<AddPetPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              // circulat avatar preview with tap to pick
+              Center(
+                child: Stack(
+                  children: [
+                    InkWell(
+                      onTap: _pickImage,
+                      borderRadius: BorderRadius.circular(56),
+                      child: CircleAvatar(
+                        radius: 56,
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        backgroundImage: _imageBytes != null
+                            ? MemoryImage(_imageBytes!)
+                            : null,
+                        child: _imageBytes == null
+                          ? Icon(
+                              Icons.add_a_photo_outlined,
+                              size: 40.0,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            )
+                          : null,
+                      ),
+                    ),
+                    // delete button if an image is selected
+                    if (_imageBytes != null)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: InkWell(
+                          onTap: _removeImage,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: EdgeInsets.all(4.0),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade600,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2
+                              )
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Center(
+                child: TextButton.icon(
+                  onPressed: _pickImage,
+                  label: Text(
+                    _imageBytes == null
+                      ? 'select image'
+                      : 'change image'
+                  )
+                ),
+              ),
+
               // pet name input
               TextFormField(
                 controller: _nameController,
