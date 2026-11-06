@@ -55,18 +55,28 @@ class PetApiService {
   }
 
   // 1. GET /api/pets
-  Future<List<Pet>> getPets({String? species}) async {
+  Future<List<Pet>> getPets({String? species, String? search}) async {
     // base uri
     var uri = Uri.parse('$baseUrl/api/pets');
-    // if species is specified and not 'all',
-    // attach query parameters
-    if (species != null && species.isNotEmpty && species.toLowerCase() != 'all') {
-      uri = uri.replace(queryParameters: {
-        'species': species.toLowerCase()
-      });
-    }
-    final response = await http.get(uri, headers: _headers);
 
+    /* query parameters */
+    // build query parameter map dynamically
+    final Map<String, String> queryParams = {};
+    // attach query parameters
+    // species and search
+    if (species != null && species.isNotEmpty && species.toLowerCase() != 'all') {
+      queryParams['species'] = species.toLowerCase();
+    }
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+    // attach query parameters if any exist
+    if (queryParams.isNotEmpty) {
+      uri = uri.replace(queryParameters: queryParams);
+    }
+
+    // response
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonBody = jsonDecode(response.body);
       final List<dynamic> data = jsonBody['data'] as List<dynamic>;

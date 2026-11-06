@@ -8,12 +8,16 @@ class PetProvider extends ChangeNotifier {
   /* properti(es) */
   // online service
   final PetApiService _apiService;
+  // loading
   bool _isLoading = false;
+  // error message
   String? _errorMesage;
   // private internal state
   List<Pet> _pets = [];
   // track currently active species filter
   String _selectedSpecies = 'all';
+  // track currently active search query
+  String _searchQuery = '';
 
   /* konstruksi */
   // dependency injection
@@ -22,6 +26,10 @@ class PetProvider extends ChangeNotifier {
   }) : _apiService = apiService ?? PetApiService();
 
   /* metode */
+  // getter for current search query
+  String get searchQuery {
+    return _searchQuery;
+  }
   // getter for ui chips to know which one is selected
   String get selectedSpecies {
     return _selectedSpecies;
@@ -46,6 +54,16 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 6. quick helper to clear search
+  Future<void> clearSearch() async {
+    _searchQuery = '';
+    await loadPets();
+  }
+  // 5. called when user submits the search bar
+  Future<void> searchPets(String query) async {
+    _searchQuery = query.trim();
+    await loadPets();
+  }
   // 4. called when user taps a filter chip
   Future<void> filterBySpecies(String species) async {
     // avoid duplicate fetch
@@ -118,7 +136,8 @@ class PetProvider extends ChangeNotifier {
 
     try {
       _pets = await _apiService.getPets(
-        species: _selectedSpecies
+        species: _selectedSpecies,
+        search: _searchQuery,
       );
 
     } catch(e) {

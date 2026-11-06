@@ -17,6 +17,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // controller to read and clear text
+  final TextEditingController _searchController = TextEditingController();
+
   static const List<String> _speciesList = [
     'all',
     'cat',
@@ -27,6 +30,37 @@ class _MyHomePageState extends State<MyHomePage> {
     'poultry',
     'wild',
   ];
+
+  Widget _buildSearchBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
+      child: SearchBar(
+        controller: _searchController,
+        hintText: 'search pets by name..',
+        leading: const Icon(Icons.search),
+        trailing: [
+          // show clear button (x)
+          // when there is text
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _searchController.clear();
+              });
+            },
+            icon: Icon(Icons.clear),
+          ),
+        ],
+        // user presses "enter" or "done" on the keyboard
+        onSubmitted: (value) {
+          context.read<PetProvider>().searchPets(value);
+        },
+        // rebuild to toggle the clear (x) icon visibility
+        onChanged: (value) {
+          setState(() {});
+        },
+      ),
+    );
+  }
 
   Widget _buildSpeciesFilter(BuildContext context, PetProvider provider) {
     return SingleChildScrollView(
@@ -55,6 +89,13 @@ class _MyHomePageState extends State<MyHomePage> {
         }).toList(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,10 +138,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          // 1. the filter chips (pinned at top)
+          // 1. the search bar (top)
+          _buildSearchBar(context),
+          
+          // 2. the filter chips (pinned at top)
           _buildSpeciesFilter(context, petProvider),
 
-          // 2. the dynamic list (takes remaining height)
+          // 3. the dynamic list (takes remaining height)
           Expanded(
             child: Builder(
               builder: (context) {
