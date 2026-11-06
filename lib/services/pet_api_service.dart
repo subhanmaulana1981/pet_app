@@ -6,7 +6,8 @@ import 'package:pet_app/models/pet.dart';
 class PetApiService {
   // replace with your active ngrok url
   // (without trailing slash)
-  static const String baseUrl = 'https://slacking-chummy-giblet.ngrok-free.dev';
+  // static const String baseUrl = 'https://slacking-chummy-giblet.ngrok-free.dev';
+  static const String baseUrl = 'http://10.0.2.2:3000';
 
   // headers required for ngrok and json endpoints
   static const Map<String, String> _headers = {
@@ -14,6 +15,25 @@ class PetApiService {
     'Accept': 'application/json',
     'ngrok-skip-browser-warning': 'true',
   };
+
+  // 4. PUT /api/pets/:id
+  Future<Pet> updatePet(String id, Pet pet) async {
+    final uri = Uri.parse('$baseUrl/api/pets/$id');
+    final response = await http.put(
+      uri,
+      headers: _headers,
+      body: jsonEncode(pet.toJson()),
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonBody = jsonDecode(response.body);
+      final dynamic data = jsonBody['data'];
+
+      return Pet.fromJson(data as Map<String, dynamic>);
+
+    } else {
+      throw Exception('failed to update pet (status: ${response.statusCode})');
+    }
+  }
 
   // 3. PATCH /api/pets/:id/favorite
   Future<Pet> toggleFavorite(String id) async {
@@ -30,7 +50,9 @@ class PetApiService {
       return Pet.fromJson(data as Map<String, dynamic>);
 
     } else {
-      throw Exception('failed to update favorite (status: ${response.statusCode})');
+      throw Exception(
+        'failed to update favorite (status: ${response.statusCode})'
+      );
     }
   }
 
@@ -42,7 +64,6 @@ class PetApiService {
       headers: _headers,
       body: jsonEncode(pet.toJson()),
     );
-
     if (response.statusCode == 201) {
       final Map<String, dynamic> jsonBody = jsonDecode(response.body);
       final dynamic data = jsonBody['data'];
@@ -63,10 +84,11 @@ class PetApiService {
     // build query parameter map dynamically
     final Map<String, String> queryParams = {};
     // attach query parameters
-    // species and search
+    // a. species
     if (species != null && species.isNotEmpty && species.toLowerCase() != 'all') {
       queryParams['species'] = species.toLowerCase();
     }
+    // b. search
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }

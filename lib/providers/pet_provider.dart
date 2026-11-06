@@ -54,6 +54,32 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 7. update existing pet via api
+  Future<void> updatePet(String petId, Pet updatedData) async {
+    _isLoading = true;
+    _errorMesage = null;
+    notifyListeners();
+
+    try {
+      final savedPet = await _apiService.updatePet(petId, updatedData);
+
+      // find index of the pet and replace it
+      final index = _pets.indexWhere((p) {
+        return p.id ==petId;
+      });
+      if (index != -1) {
+        _pets[index] = savedPet;
+      }
+
+    } catch (e) {
+      _errorMesage = e.toString();
+      rethrow;
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
   // 6. quick helper to clear search
   Future<void> clearSearch() async {
     _searchQuery = '';

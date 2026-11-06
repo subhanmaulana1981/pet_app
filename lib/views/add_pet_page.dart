@@ -155,7 +155,7 @@ class _AddPetPageState extends State<AddPetPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // circulat avatar preview with tap to pick
+              // circle avatar preview with tap to pick
               Center(
                 child: Stack(
                   children: [
