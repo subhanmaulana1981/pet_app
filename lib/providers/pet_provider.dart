@@ -54,6 +54,29 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 8. delete pet via api with optimistic rollback
+  Future<void> deletePet(String petId) async {
+    final index = _pets.indexWhere((p) {
+      return p.id == petId;
+    });
+
+    // 1. optimistic removal
+    final removedPet = _pets.removeAt(index);
+    notifyListeners();
+
+    try {
+      // 2. call backend
+      await _apiService.deletePet(petId);
+
+    } catch (e) {
+      // 3. rollback if backend failed
+      _pets.insert(index, removedPet);
+      _errorMesage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   // 7. update existing pet via api
   Future<void> updatePet(String petId, Pet updatedData) async {
     _isLoading = true;

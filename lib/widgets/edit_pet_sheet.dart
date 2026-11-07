@@ -1,7 +1,9 @@
+
 import 'package:flutter/material.dart';
 import 'package:pet_app/models/pet.dart';
 import 'package:pet_app/providers/pet_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:pet_app/widgets/confirm_dialog.dart';
 
 class EditPetSheet extends StatefulWidget {
   final Pet pet;
@@ -64,6 +66,59 @@ class _EditPetSheetState extends State<EditPetSheet> {
     super.dispose();
   }
 
+  // deleting pet
+  Future<void> _deletePet() async {
+    // 1. show confirmation dialog
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'delete pet',
+      message: 'are you sure you want to delete '
+        '"${widget.pet.name}"? '
+        'this action cannot be undone!'
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      // 2. call provider to delete pet
+      if (!mounted) return;
+      await context.read<PetProvider>().deletePet(widget.pet.id);
+
+      // 3. close the bottom sheet
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      // 4. show confirmation feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.pet.name} has been deleted!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('failed to delete pet: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
+      );
+
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  // editing pet
   Future<void> _editPet() async {
     // 1. validate form fields
     if (!_formKey.currentState!.validate()) {
@@ -225,6 +280,25 @@ class _EditPetSheetState extends State<EditPetSheet> {
                 label: Text(_isSubmitting ? 'updating..' : 'update pet'),
                 style: FilledButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14.0),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              // 6. delete button
+              OutlinedButton.icon(
+                onPressed: _isSubmitting ? null : _deletePet,
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                ),
+                label: Text(
+                  'delete pet',
+                  style: TextStyle(
+                    color: Colors.red
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.red),
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
                 ),
               ),
             ],

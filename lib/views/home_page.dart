@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_app/providers/pet_provider.dart';
 import 'package:pet_app/views/add_pet_page.dart';
+import 'package:pet_app/widgets/confirm_dialog.dart';
 import 'package:pet_app/widgets/edit_pet_sheet.dart';
 import 'package:pet_app/widgets/pet_avatar.dart';
 import 'package:provider/provider.dart';
@@ -191,42 +192,91 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: pets.length,
                     itemBuilder: (context, index) {
                       final pet = pets[index];
-                      return ListTile(
-                        // this is the new pet avatar
-                        leading: PetAvatar(pet: pet),
-                        title: Text(pet.name),
-                        subtitle: Text(pet.species),
-                        trailing: IconButton(
-                          onPressed: () async {
-                            try {
-                              await context
-                                  .read<PetProvider>()
-                                  .toggleFavorite(pet.id);
-
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('failed to update favorite: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          icon: Icon(
-                            pet.isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: pet.isFavorite ? Colors.red : null,
+                      return Dismissible(
+                        key: Key(pet.id),
+                        // swipe from right to left
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          color: Colors.red,
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.white,
                           ),
                         ),
-                        tileColor: (index.isEven)
-                            ? null
-                            : colorScheme.surfaceContainerHigh,
-                        onTap: () {
-                          EditPetSheet.show(context, pet: pet);
+                        confirmDismiss: (direction) async {
+                          return ConfirmDialog.show(
+                            context,
+                            title: 'delete pet',
+                            message: 'are you sure you want to delete '
+                                '"${pet.name}"? '
+                                'this action cannot be undone!'
+                          );
                         },
+                        onDismissed: (direction) async {
+                          final petName = pet.name;
+                          try {
+                            await context.read<PetProvider>().deletePet(
+                              pet.id
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$petName has been deleted.'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('failed to delete $petName: $e'),
+                                    backgroundColor: Colors.red,
+                                  )
+                              );
+                            }
+                          }
+                        },
+                        child: ListTile(
+                          // this is the new pet avatar
+                          leading: PetAvatar(pet: pet),
+                          title: Text(pet.name),
+                          subtitle: Text(pet.species),
+                          trailing: IconButton(
+                            onPressed: () async {
+                              try {
+                                await context
+                                    .read<PetProvider>()
+                                    .toggleFavorite(pet.id);
+
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('failed to update favorite: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: Icon(
+                              pet.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: pet.isFavorite ? Colors.red : null,
+                            ),
+                          ),
+                          tileColor: (index.isEven)
+                              ? null
+                              : colorScheme.surfaceContainerHigh,
+                          onTap: () {
+                            EditPetSheet.show(context, pet: pet);
+                          },
+                        ),
                       );
                   }),
                 );

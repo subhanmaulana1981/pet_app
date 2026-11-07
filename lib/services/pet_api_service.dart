@@ -16,6 +16,21 @@ class PetApiService {
     'ngrok-skip-browser-warning': 'true',
   };
 
+  // 5. DELETE /api/pets/:id
+  Future<void> deletePet(String id) async {
+    final uri = Uri.parse('$baseUrl/api/pets/$id');
+    final response = await http.delete(
+      uri,
+      headers: _headers
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'failed to delete pet (status: ${response.statusCode})'
+      );
+    }
+  }
+
   // 4. PUT /api/pets/:id
   Future<Pet> updatePet(String id, Pet pet) async {
     final uri = Uri.parse('$baseUrl/api/pets/$id');
