@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onSubmitted: (value) {
           context.read<PetProvider>().searchPets(value);
         },
-        // rebuild to toggle the clear (x) icon visibility
+        // rebuild to toggle the clear (x) icons visibility
         onChanged: (value) {
           setState(() {});
         },

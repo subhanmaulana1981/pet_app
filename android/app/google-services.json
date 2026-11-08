@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "490294556057",
+    "project_id": "my-pet-app-8885a",
+    "storage_bucket": "my-pet-app-8885a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490294556057:android:73dfb7b0ecba2cd992cf08",
+        "android_client_info": {
+          "package_name": "com.example.pet_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2oHxIg7y2o5yHx05FOe5nlMT1HjTyJZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
