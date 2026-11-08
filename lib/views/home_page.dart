@@ -1,7 +1,10 @@
 
 import 'package:flutter/material.dart';
+// import 'package:pet_app/models/pet.dart';
 import 'package:pet_app/providers/pet_provider.dart';
+import 'package:pet_app/services/pet_pdf_service.dart';
 import 'package:pet_app/views/add_pet_page.dart';
+import 'package:pet_app/views/pdf_preview_page.dart';
 import 'package:pet_app/widgets/confirm_dialog.dart';
 import 'package:pet_app/widgets/edit_pet_sheet.dart';
 import 'package:pet_app/widgets/pet_avatar.dart';
@@ -124,6 +127,63 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          // share this list of pets
+          IconButton(
+            onPressed: () async {
+              final petProvider = context.read<PetProvider>();
+              if (petProvider.pets.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('no pets to generate report.')
+                  ),
+                );
+                return;
+              }
+              // show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              );
+
+              try {
+                // 1. generate the pdf bytes
+                final pdfBytes = await PetPdfService.generatePetReport(petProvider.pets);
+                // close loading dialog
+                if (context.mounted) Navigator.pop(context);
+
+                // 2. navigate to preview screen
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return PdfPreviewPage(
+                          pdfBytes: pdfBytes,
+                          title: 'pet catalog report',
+                        );
+                      }
+                    ),
+                  );
+                }
+
+              } catch (e) {
+                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('error generating pdf: $e')),
+                  );
+                }
+              }
+            },
+            icon: Icon(Icons.picture_as_pdf),
+            tooltip: 'export catalog pdf',
+          ),
+          // how many favorite pets are
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
