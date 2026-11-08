@@ -6,8 +6,9 @@ import 'package:pet_app/models/pet.dart';
 class PetApiService {
   // replace with your active ngrok url
   // (without trailing slash)
+  static const String baseUrl = 'https://pet-api-sand.vercel.app';
   // static const String baseUrl = 'https://slacking-chummy-giblet.ngrok-free.dev';
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  // static const String baseUrl = 'http://10.0.2.2:3000';
 
   // headers required for ngrok and json endpoints
   static const Map<String, String> _headers = {
