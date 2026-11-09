@@ -8,6 +8,7 @@ import 'package:pet_app/views/pdf_preview_page.dart';
 import 'package:pet_app/widgets/confirm_dialog.dart';
 import 'package:pet_app/widgets/edit_pet_sheet.dart';
 import 'package:pet_app/widgets/pet_avatar.dart';
+import 'package:pet_app/widgets/pet_drawer.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -345,6 +346,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      drawer: PetDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

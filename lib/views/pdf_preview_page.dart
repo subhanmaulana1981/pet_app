@@ -25,10 +25,16 @@ class PdfPreviewPage extends StatelessWidget {
       final file = File('${tempDir.path}/pet_catalog_${DateTime.now().millisecondsSinceEpoch}.pdf');
       await file.writeAsBytes(pdfBytes, flush: true);
 
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/pdf')],
+      final params = ShareParams(
+        files: [XFile(file.path, mimeType: 'application/pdf')],
         text: 'here is the pet catalog report.',
       );
+      SharePlus.instance.share(params);
+
+      /*await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/pdf')],
+        text: 'here is the pet catalog report.',
+      );*/
 
     } catch (e) {
       if (context.mounted) {
