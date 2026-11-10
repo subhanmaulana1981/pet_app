@@ -35,4 +35,4 @@ jobs:
           appId: "1:490294556057:android:73dfb7b0ecba2cd992cf08"
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: "testers"  # Replace with your Firebase tester group name
-          file: pet_app/build/app/outputs/flutter-apk/app-release.apk
+          file: build/app/outputs/flutter-apk/app-release.apk
