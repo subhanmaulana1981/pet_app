@@ -1,6 +1,6 @@
 {
-    "name": "pet_app",
-    "short_name": "pet_app",
+    "name": "My Pet",
+    "short_name": "My Pet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

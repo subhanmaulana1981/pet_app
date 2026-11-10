@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         return PetProvider();
       },
       child: MaterialApp(
-        title: 'Pet App',
+        title: 'My Pet',
         theme: ThemeData(
           colorScheme: .fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
