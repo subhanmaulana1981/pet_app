@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.1.6
   share_plus: ^13.3.1
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 dev_dependencies:
   flutter_test:
@@ -105,3 +106,14 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/icons/app_icon.png"
+
+flutter_native_splash:
+  # Matches your DeepPurple theme (or use "#ffffff")
+  # NOTE: do not use 'color' when using 'background image'
+  # they cannot be used together
+  # color: "#6750A4"
+  background_image: assets/images/launch_image.png
+  android_12:
+    image: assets/images/launch_image.png
+    icon_background_color: "#6750A4"
+  web: false
