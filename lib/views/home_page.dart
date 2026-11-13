@@ -10,6 +10,7 @@ import 'package:pet_app/widgets/edit_pet_sheet.dart';
 import 'package:pet_app/widgets/pet_avatar.dart';
 import 'package:pet_app/widgets/pet_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:pet_app/widgets/pet_preview_dialog.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
@@ -338,7 +339,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                         child: ListTile(
                           // this is the new pet avatar
-                          leading: PetAvatar(pet: pet),
+                          leading: GestureDetector(
+                            onTap: () {
+                              PetPreviewDialog.show(
+                                context,
+                                pet: pet
+                              );
+                            },
+                            child: PetAvatar(pet: pet)
+                          ),
                           title: Text(pet.name),
                           subtitle: Text(pet.species),
                           trailing: IconButton(
