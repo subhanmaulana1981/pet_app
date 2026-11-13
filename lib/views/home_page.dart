@@ -38,6 +38,36 @@ class _MyHomePageState extends State<MyHomePage> {
     'wild',
   ];
 
+  Widget _buildDeleteHint(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 4.0
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.swipe_left_rounded,
+            size: 16.0,
+            color: colorScheme.outline,
+          ),
+          SizedBox(width: 6.0),
+
+          Text(
+            "swipe left on a pet to delete",
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.outline,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
@@ -207,6 +237,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
           // 2. the filter chips (pinned at top)
           _buildSpeciesFilter(context, petProvider),
+
+          // delete hint
+          // only visible
+          // when pets list is not empty
+          if (pets.isNotEmpty) _buildDeleteHint(context),
 
           // 3. the dynamic list (takes remaining height)
           Expanded(
