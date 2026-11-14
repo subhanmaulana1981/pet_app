@@ -54,6 +54,46 @@ class PetProvider extends ChangeNotifier {
   }
 
   /* business logics */
+  // 10. clear all pets from database
+  Future<void> clearAllPets() async {
+    _isLoading = true;
+    _errorMesage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.clearAllPets();
+      _pets = [];
+
+    } catch (e) {
+      _errorMesage = e.toString();
+      rethrow;
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 9. seed sample pets (reset or append)
+  Future<void> seedPets({bool clean = false}) async {
+    _isLoading = true;
+    _errorMesage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.seedPets(clean: clean);
+      await loadPets();
+
+    } catch (e) {
+      _errorMesage = e.toString();
+      rethrow;
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // 8. delete pet via api with optimistic rollback
   Future<void> deletePet(String petId) async {
     final index = _pets.indexWhere((p) {

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pet_app/views/add_pet_page.dart';
+import 'package:pet_app/widgets/demo_data_sheet.dart';
 
 class PetDrawer extends StatelessWidget {
   const PetDrawer({super.key});
@@ -32,40 +33,6 @@ class PetDrawer extends StatelessWidget {
               style: theme.textTheme.bodyMedium,
             ),
           ),
-          /*DrawerHeader(
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: colorScheme.primary,
-                  child: Image.asset(
-                    'assets/images/subhanmaulana_profile_small.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                SizedBox(height: 12),
-
-                Text(
-                  'pet manager',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                Text(
-                  'care and tracking',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),*/
           // 2. navigation items
           ListTile(
             leading: Icon(
@@ -86,6 +53,7 @@ class PetDrawer extends StatelessWidget {
             },
           ),
           Divider(),
+
           // 3. optional settings / app info
           ListTile(
             leading: Icon(
@@ -104,6 +72,23 @@ class PetDrawer extends StatelessWidget {
                   size: 72,
                 ),
               );
+            },
+          ),
+          Divider(),
+
+          // 3. demo data tools
+          ListTile(
+            leading: Icon(
+              Icons.auto_awesome_outlined,
+              size: 48,
+            ),
+            title: Text('demo data tools'),
+            subtitle: Text('seed or clean catalog data'),
+            onTap: () {
+              // close the drawer first
+              Navigator.pop(context);
+              // open the modal bottom sheet
+              DemoDataSheet.show(context);
             },
           ),
           Divider(),
